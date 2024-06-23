@@ -93,6 +93,12 @@ export class Vulnerabilities {
     }
   }
 
+  /**
+   * Get all vulnerabilities
+   *
+   * @param config
+   * @param packageFiles
+   */
   async fetchVulnerabilities(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>,
@@ -104,6 +110,13 @@ export class Vulnerabilities {
     return groups.flatMap((group) => group.vulnerabilities);
   }
 
+  /**
+   * Returns vulnerabilities for **every manager** (npm, maven, etc)
+   *
+   * @param config
+   * @param packageFiles
+   * @private
+   */
   private async fetchDependencyVulnerabilities(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>,
@@ -115,6 +128,14 @@ export class Vulnerabilities {
     return (await Promise.all(allManagerJobs)).flat();
   }
 
+  /**
+   * Returns vulnerabilities for **every packageFile** in a manager group
+   *
+   * @param config
+   * @param packageFiles
+   * @param manager
+   * @private
+   */
   private async fetchManagerVulnerabilities(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>,
@@ -134,6 +155,13 @@ export class Vulnerabilities {
     return result;
   }
 
+  /**
+   * Returns vulnerabilities for **every dependency** in a packageFile
+   *
+   * @param managerConfig
+   * @param pFile
+   * @private
+   */
   private async fetchManagerPackageFileVulnerabilities(
     managerConfig: RenovateConfig,
     pFile: PackageFile,
@@ -159,6 +187,13 @@ export class Vulnerabilities {
     return result.filter(is.truthy);
   }
 
+  /**
+   * Fetch the vulnerability of a dependency
+   *
+   * @param packageFileConfig
+   * @param dep
+   * @private
+   */
   private async fetchDependencyVulnerability(
     packageFileConfig: RenovateConfig & PackageFile,
     dep: PackageDependency,
@@ -175,6 +210,23 @@ export class Vulnerabilities {
       packageName = packageName.toLowerCase().replace(regEx(/[_.-]+/g), '-');
     }
 
+    /**
+     * `this.osvOffline?.getVulnerabilities` will get the vulnerabilities for a single package.
+     * So before this we need to get recursively all the dependencies of `packageName`.
+     * The way to receive the dependencies will be different for al the ecosystems.
+     * - 'crates.io', unknown
+     * - 'Go', unknown
+     * - 'Hex', unknown
+     * - 'Maven', all dependencies of a package a known after building, or need to be retrieved form the repository.
+     * - 'npm', all dependencies are in the package.lock.json
+     * - 'NuGet', unknown
+     * - 'Packagist', unknown
+     * - 'Pub', unknown
+     * - 'PyPI', unknown
+     * - 'RubyGems', unknown
+     *
+     * To speed up the receiving of the dependencies a kind of caching would be helpful.
+     */
     try {
       const osvVulnerabilities = await this.osvOffline?.getVulnerabilities(
         ecosystem,
