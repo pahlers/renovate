@@ -14,7 +14,7 @@ You also don't have to scroll to the bottom of the page to find the latest relea
 General:
 
 - Require Node.js 20 ([#30291](https://github.com/renovatebot/renovate/pull/30291))
-- The Renovate Docker images no longer have `-slim` tags. You must stop using the `-slim` prefix. Renovate now defaults to the `-slim` tag type behavior.
+- The Renovate Docker images no longer have `-slim` tags. You must stop using the `-slim` suffix. Renovate now defaults to the `-slim` tag type behavior.
 
 Specific:
 
